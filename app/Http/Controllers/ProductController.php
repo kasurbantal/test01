@@ -14,7 +14,7 @@ class ProductController extends Controller
         $products = Product::latest()->paginate(5);
 
         //rendering view dengan products
-        return view('product.index', compact('products'));
+        return view('products.index', compact('products'));
     }
 
 }
