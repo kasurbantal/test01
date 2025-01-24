@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <title>Data Products</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body style="background: lightgray">
 
     <div class="container mt-5">
@@ -33,15 +35,19 @@
                                 @forelse ($products as $product)
                                     <tr>
                                         <td class="text-center">
-                                            <img src="{{ asset('/storage/products/'.$product->image) }}" class="rounded" style="width: 150px">
+                                            <img src="{{ asset('/storage/products/' . $product->image) }}"
+                                                class="rounded" style="width: 150px">
                                         </td>
                                         <td>{{ $product->title }}</td>
-                                        <td>{{ "Rp " . number_format($product->price,2,',','.') }}</td>
+                                        <td>{{ 'Rp ' . number_format($product->price, 2, ',', '.') }}</td>
                                         <td>{{ $product->stock }}</td>
                                         <td class="text-center">
-                                            <form onsubmit="return confirm('Apakah Anda Yakin ?');" action="{{ route('products.destroy', $product->id) }}" method="POST">
-                                                <a href="{{ route('products.show', $product->id) }}" class="btn btn-sm btn-dark">SHOW</a>
-                                                <a href="{{ route('products.edit', $product->id) }}" class="btn btn-sm btn-primary">EDIT</a>
+                                            <form onsubmit="return confirm('Apakah Anda Yakin ?');"
+                                                action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                                <a href="{{ route('products.show', $product->id) }}"
+                                                    class="btn btn-sm btn-dark">SHOW</a>
+                                                <a href="{{ route('products.edit', $product->id) }}"
+                                                    class="btn btn-sm btn-primary">EDIT</a>
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="btn btn-sm btn-danger">HAPUS</button>
@@ -67,7 +73,7 @@
 
     <script>
         //message with sweetalert
-        @if(session('success'))
+        @if (session('success'))
             Swal.fire({
                 icon: "success",
                 title: "BERHASIL",
@@ -75,7 +81,7 @@
                 showConfirmButton: false,
                 timer: 2000
             });
-        @elseif(session('error'))
+        @elseif (session('error'))
             Swal.fire({
                 icon: "error",
                 title: "GAGAL!",
@@ -84,8 +90,8 @@
                 timer: 2000
             });
         @endif
-
     </script>
 
 </body>
+
 </html>
