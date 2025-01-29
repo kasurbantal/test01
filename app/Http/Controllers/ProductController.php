@@ -99,8 +99,8 @@ class ProductController extends Controller
     private function validateProduct(Request $request, bool $isNew = true): array
     {
         $rules = [
-            'title'       => 'required|min:5',
-            'description' => 'required|min:10',
+            'title'       => 'required|string|min:5',
+            'description' => 'required|string|min:10',
             'price'       => 'required|numeric',
             'stock'       => 'required|numeric',
         ];
@@ -110,11 +110,11 @@ class ProductController extends Controller
         }
 
         return $request->validate($rules, [
-            'image.required' => 'isi bro',
-            'image.image' => 'image dong bro',
-            'image.mimes' => 'yang sesuai dong bro',
-            'image.max' => 'maxnya 2 mb bro',
-            'title.min' => 'minimal 5 suku kata mas',
+            'image.required' => 'Gambar produk wajib diisi.',
+            'image.image'    => 'File yang diunggah harus berupa gambar.',
+            'image.mimes'    => 'Format gambar harus berupa JPEG, JPG, atau PNG.',
+            'image.max'      => 'Ukuran gambar maksimal adalah 2 MB.',
+            'title.min'      => 'Judul produk minimal harus memiliki 5 karakter.',
         ]);
     }
 
