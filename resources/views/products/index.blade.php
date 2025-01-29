@@ -5,65 +5,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Data Products</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Product Data Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
 </head>
 
-<body style="background: lightgray">
+<body style="background-color: #f8f9fa;">
 
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-md-12">
-                <div>
-                    <h3 class="text-center my-4">Laravel 11 Test</h3>
-                    <hr>
-                </div>
-                <div class="card border-0 shadow-sm rounded">
-                    <div class="card-body">
-                        <a href="{{ route('products.create') }}" class="btn btn-md btn-success mb-3">ADD PRODUCT</a>
-                        <table class="table table-bordered">
-                            <thead>
+    <div class="container py-5">
+        <h3 class="text-center mb-4">Product Management Dashboard</h3>
+        <div class="card shadow rounded border-0">
+            <div class="card-body">
+                <a href="{{ route('products.create') }}" class="btn btn-success mb-3">Add Product</a>
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th scope="col">Image</th>
+                                <th scope="col">Title</th>
+                                <th scope="col">Price</th>
+                                <th scope="col">Stock</th>
+                                <th scope="col" class="text-center" style="width: 20%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($products as $product)
                                 <tr>
-                                    <th scope="col">IMAGE</th>
-                                    <th scope="col">TITLE</th>
-                                    <th scope="col">PRICE</th>
-                                    <th scope="col">STOCK</th>
-                                    <th scope="col" style="width: 20%">ACTIONS</th>
+                                    <td class="text-center">
+                                        <img src="{{ asset('storage/products/' . $product->image) }}"
+                                            alt="Product Image" class="img-thumbnail" style="width: 120px;">
+                                    </td>
+                                    <td>{{ $product->title }}</td>
+                                    <td>{{ 'Rp ' . number_format($product->price, 2, ',', '.') }}</td>
+                                    <td>{{ $product->stock }}</td>
+                                    <td class="text-center">
+                                        <form onsubmit="return confirm('Are you sure?');"
+                                            action="{{ route('products.destroy', $product->id) }}" method="POST">
+                                            <a href="{{ route('products.show', $product->id) }}"
+                                                class="btn btn-dark btn-sm">View</a>
+                                            <a href="{{ route('products.edit', $product->id) }}"
+                                                class="btn btn-primary btn-sm">Edit</a>
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                        </form>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @forelse ($products as $product)
-                                    <tr>
-                                        <td class="text-center">
-                                            <img src="{{ asset('/storage/products/' . $product->image) }}"
-                                                class="rounded" style="width: 150px">
-                                        </td>
-                                        <td>{{ $product->title }}</td>
-                                        <td>{{ 'Rp ' . number_format($product->price, 2, ',', '.') }}</td>
-                                        <td>{{ $product->stock }}</td>
-                                        <td class="text-center">
-                                            <form onsubmit="return confirm('Apakah Anda Yakin ?');"
-                                                action="{{ route('products.destroy', $product->id) }}" method="POST">
-                                                <a href="{{ route('products.show', $product->id) }}"
-                                                    class="btn btn-sm btn-dark">SHOW</a>
-                                                <a href="{{ route('products.edit', $product->id) }}"
-                                                    class="btn btn-sm btn-primary">EDIT</a>
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">HAPUS</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <div class="alert alert-danger">
-                                        Data Products belum Tersedia.
-                                    </div>
-                                @endforelse
-                            </tbody>
-                        </table>
-                        {{ $products->links() }}
-                    </div>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-danger">No product data available.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+                {{ $products->links() }}
             </div>
         </div>
     </div>
@@ -72,20 +67,20 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        //message with sweetalert
+        // Display flash messages using SweetAlert2
         @if (session('success'))
             Swal.fire({
-                icon: "success",
-                title: "BERHASIL",
-                text: "{{ session('success') }}",
+                icon: 'success',
+                title: 'Success',
+                text: '{{ session('success') }}',
                 showConfirmButton: false,
                 timer: 2000
             });
         @elseif (session('error'))
             Swal.fire({
-                icon: "error",
-                title: "GAGAL!",
-                text: "{{ session('error') }}",
+                icon: 'error',
+                title: 'Error',
+                text: '{{ session('error') }}',
                 showConfirmButton: false,
                 timer: 2000
             });
