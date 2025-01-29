@@ -2,41 +2,27 @@
 
 namespace App\Http\Controllers;
 
-//import model product
 use App\Models\Product;
-
-//import return type View
 use Illuminate\View\View;
-
-//import return type redirectResponse
 use Illuminate\Http\Request;
-
-//import Http Request
 use Illuminate\Http\RedirectResponse;
-
-//import Facades Storage
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
-    /**
-     * index
-     *
-     * @return void
-     */
-    public function index() : View
-    {
-        //get all products
-        $products = Product::latest()->paginate(10);
+    private const IMAGE_STORAGE_PATH = 'public/products';
 
-        //render view with products
+    /**
+     * Display a listing of the products.
+     */
+    public function index(): View
+    {
+        $products = Product::latest()->paginate(10);
         return view('products.index', compact('products'));
     }
 
     /**
-     * create
-     *
-     * @return View
+     * Show the form for creating a new product.
      */
     public function create(): View
     {
@@ -44,146 +30,100 @@ class ProductController extends Controller
     }
 
     /**
-     * store
-     *
-     * @param  mixed $request
-     * @return RedirectResponse
+     * Store a newly created product in storage.
      */
     public function store(Request $request): RedirectResponse
     {
-        //validate form
-        $request->validate([
-            'image'         => 'required|image|mimes:jpeg,jpg,png|max:2048',
-            'title'         => 'required|min:5',
-            'description'   => 'required|min:10',
-            'price'         => 'required|numeric',
-            'stock'         => 'required|numeric'
-        ], ['image.required' => 'isi bro',
-            'image.image' => 'image dong bro',
-            'image.mimes' => 'yang sesuai dong bro',
-            'image.max' => 'maxnya 2 mb bro',
-            'title.min' => 'minimal 5 suku kata mas']);
+        $validated = $this->validateProduct($request);
 
-        //upload image
-        $image = $request->file('image');
-        $image->storeAs('public/products', $image->hashName());
+        if ($request->hasFile('image')) {
+            $validated['image'] = $this->storeImage($request->file('image'));
+        }
 
-        //create product
-        Product::create([
-            'image'         => $image->hashName(),
-            'title'         => $request->title,
-            'description'   => $request->description,
-            'price'         => $request->price,
-            'stock'         => $request->stock
-        ]);
+        Product::create($validated);
 
-        //redirect to index
-        return redirect()->route('products.index')->with(['success' => 'Data Berhasil Disimpan!']);
+        return redirect()->route('products.index')->with('success', 'Data Berhasil Disimpan!');
     }
 
     /**
-     * show
-     *
-     * @param  mixed $id
-     * @return View
+     * Display the specified product.
      */
     public function show(string $id): View
     {
-        //get product by ID
         $product = Product::findOrFail($id);
-
-        //render view with product
         return view('products.show', compact('product'));
     }
 
     /**
-     * edit
-     *
-     * @param  mixed $id
-     * @return View
+     * Show the form for editing the specified product.
      */
     public function edit(string $id): View
     {
-        //get product by ID
         $product = Product::findOrFail($id);
-
-        //render view with product
         return view('products.edit', compact('product'));
     }
 
     /**
-     * update
-     *
-     * @param  mixed $request
-     * @param  mixed $id
-     * @return RedirectResponse
+     * Update the specified product in storage.
      */
-    public function update(Request $request, $id): RedirectResponse
+    public function update(Request $request, string $id): RedirectResponse
     {
-        //validate form
-        $request->validate([
-            'image'         => 'image|mimes:jpeg,jpg,png|max:2048',
-            'title'         => 'required|min:5',
-            'description'   => 'required|min:10',
-            'price'         => 'required|numeric',
-            'stock'         => 'required|numeric'
-        ]);
-
-        //get product by ID
         $product = Product::findOrFail($id);
+        $validated = $this->validateProduct($request, false);
 
-        //check if image is uploaded
         if ($request->hasFile('image')) {
-
-            //upload new image
-            $image = $request->file('image');
-            $image->storeAs('public/products', $image->hashName());
-
-            //delete old image
-            Storage::delete('public/products/'.$product->image);
-
-            //update product with new image
-            $product->update([
-                'image'         => $image->hashName(),
-                'title'         => $request->title,
-                'description'   => $request->description,
-                'price'         => $request->price,
-                'stock'         => $request->stock
-            ]);
-
-        } else {
-
-            //update product without image
-            $product->update([
-                'title'         => $request->title,
-                'description'   => $request->description,
-                'price'         => $request->price,
-                'stock'         => $request->stock
-            ]);
+            Storage::delete(self::IMAGE_STORAGE_PATH . '/' . $product->image);
+            $validated['image'] = $this->storeImage($request->file('image'));
         }
 
-        //redirect to index
-        return redirect()->route('products.index')->with(['success' => 'Data Berhasil Diubah!']);
+        $product->update($validated);
+
+        return redirect()->route('products.index')->with('success', 'Data Berhasil Diubah!');
     }
 
     /**
-     * destroy
-     *
-     * @param  mixed $id
-     * @return RedirectResponse
+     * Remove the specified product from storage.
      */
-    public function destroy($id): RedirectResponse
+    public function destroy(string $id): RedirectResponse
     {
-        //get product by ID
         $product = Product::findOrFail($id);
-
-        //delete image
-        Storage::delete('public/products/'. $product->image);
-
-        //delete product
+        Storage::delete(self::IMAGE_STORAGE_PATH . '/' . $product->image);
         $product->delete();
 
-        //redirect to index
-        return redirect()->route('products.index')->with(['success' => 'Data Berhasil Dihapus!']);
+        return redirect()->route('products.index')->with('success', 'Data Berhasil Dihapus!');
+    }
+
+    /**
+     * Validate the product request data.
+     */
+    private function validateProduct(Request $request, bool $isNew = true): array
+    {
+        $rules = [
+            'title'       => 'required|min:5',
+            'description' => 'required|min:10',
+            'price'       => 'required|numeric',
+            'stock'       => 'required|numeric',
+        ];
+
+        if ($isNew || $request->hasFile('image')) {
+            $rules['image'] = 'required|image|mimes:jpeg,jpg,png|max:2048';
+        }
+
+        return $request->validate($rules, [
+            'image.required' => 'isi bro',
+            'image.image' => 'image dong bro',
+            'image.mimes' => 'yang sesuai dong bro',
+            'image.max' => 'maxnya 2 mb bro',
+            'title.min' => 'minimal 5 suku kata mas',
+        ]);
+    }
+
+    /**
+     * Store the uploaded image and return its hash name.
+     */
+    private function storeImage($image): string
+    {
+        $image->storeAs(self::IMAGE_STORAGE_PATH, $image->hashName());
+        return $image->hashName();
     }
 }
