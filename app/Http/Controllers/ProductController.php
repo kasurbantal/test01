@@ -110,11 +110,15 @@ class ProductController extends Controller
         }
 
         return $request->validate($rules, [
-            'image.required' => 'Gambar produk wajib diisi.',
-            'image.image'    => 'File yang diunggah harus berupa gambar.',
-            'image.mimes'    => 'Format gambar harus berupa JPEG, JPG, atau PNG.',
-            'image.max'      => 'Ukuran gambar maksimal adalah 2 MB.',
-            'title.min'      => 'Judul produk minimal harus memiliki 5 karakter.',
+            'image.required'            => 'Gambar produk wajib diisi.',
+            'image.image'               => 'File yang diunggah harus berupa gambar.',
+            'image.mimes'               => 'Format gambar harus berupa JPEG, JPG, atau PNG.',
+            'image.max'                 => 'Ukuran gambar maksimal adalah 2 MB.',
+            'title.required'            => 'Judul produk harus diisi.',
+            'title.min'                 => 'Judul produk minimal harus memiliki 5 karakter.',
+            'description.required'      => 'Deskripsi produk harus diisi.',
+            'price.required'            => 'Harga produk harus diisi.',
+            'stock.required'            => 'Ketersediaan / stok produk harus diisi.',
         ]);
     }
 
