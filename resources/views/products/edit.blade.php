@@ -79,7 +79,8 @@
 
                             <div class="d-flex justify-content-between">
                                 <button type="submit" class="btn btn-primary">Update</button>
-                                <button type="reset" class="btn btn-warning">Reset</button>
+                                <button type="button" class="btn btn-secondary"
+                                    onclick="window.location.href='{{ route('products.index') }}'">Cancel</button>
                             </div>
                         </form>
                     </div>
